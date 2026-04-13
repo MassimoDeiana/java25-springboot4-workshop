@@ -18,10 +18,11 @@ import java.util.concurrent.ExecutionException;
  * - Thread dumps don't show parent-child relationships
  *
  * YOUR TASK (after):
- * 1. Replace CompletableFuture with StructuredTaskScope.ShutdownOnFailure
+ * 1. Open a scope with StructuredTaskScope.open(Joiner.awaitAllSuccessfulOrThrow())
  * 2. Use scope.fork() for each service call
- * 3. Use scope.join() + scope.throwIfFailed() for clean error handling
+ * 3. Use scope.join() — throws FailedException on first failure
  * 4. Wrap in try-with-resources for automatic cleanup
+ * 5. Catch FailedException to handle compliance rejections gracefully
  *
  * Benefits: If compliance check fails, balance and profile calls are
  * cancelled immediately. No wasted resources, clean error propagation.
