@@ -1,11 +1,12 @@
 package com.bankflow.workshop.exercise3_stablevalues;
 
+import java.lang.StableValue;
 import java.util.Map;
 
 /**
- * TODO: Exercise 3 — Stable Values (second class to refactor)
+ * SOLUTION: Exercise 3 — Stable Values (JEP 502)
  *
- * Same pattern: replace volatile + double-checked locking with StableValue.
+ * Same pattern: StableValue replaces volatile + double-checked locking.
  */
 public class RegulationConfigLoader {
 
@@ -16,27 +17,13 @@ public class RegulationConfigLoader {
             Map<String, String> additionalRules
     ) {}
 
-    // TODO: Replace with StableValue<RegulationConfig>
-    private volatile RegulationConfig config;
+    private final StableValue<RegulationConfig> config = StableValue.of();
 
     public RegulationConfig getConfig() {
-        // TODO: Replace with stableValue.orElseSet(this::loadConfig)
-        if (config == null) {
-            synchronized (this) {
-                if (config == null) {
-                    config = loadConfig();
-                }
-            }
-        }
-        return config;
+        return config.orElseSet(this::loadConfig);
     }
 
-    /**
-     * Simulates loading regulation config from an external source.
-     * In real life, this would read from a database or config service.
-     */
     private RegulationConfig loadConfig() {
-        // Simulate slow loading
         try { Thread.sleep(50); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 
         return new RegulationConfig(

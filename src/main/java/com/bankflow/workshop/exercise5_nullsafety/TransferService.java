@@ -5,17 +5,10 @@ import com.bankflow.workshop.domain.Account;
 import java.math.BigDecimal;
 
 /**
- * TODO: Exercise 5 — JSpecify Null Safety
+ * SOLUTION: Exercise 5 — JSpecify Null Safety
  *
- * CURRENT STATE (before):
- * - Calls findByIban() without null-checking the result
- * - Will throw NullPointerException at runtime if account not found
- * - No compile-time warning because the null contract is not expressed
- *
- * YOUR TASK (after):
- * - After annotating AccountLookupService with @Nullable, the IDE will flag this code
- * - Add proper null checks and throw AccountNotFoundException
- * - The code should have ZERO null-safety warnings in IntelliJ
+ * Proper null checks after @Nullable annotations.
+ * Throws AccountNotFoundException instead of NPE.
  */
 public class TransferService {
 
@@ -25,19 +18,17 @@ public class TransferService {
         this.lookupService = lookupService;
     }
 
-    /**
-     * Execute a transfer between two accounts.
-     *
-     * BUG: This will throw NullPointerException if either account is not found!
-     * After adding @Nullable annotations to AccountLookupService, fix this method.
-     */
     public TransferResult executeTransfer(String fromIban, String toIban, BigDecimal amount) {
-        // TODO: After @Nullable annotations, the IDE will warn here
-        // Fix by adding null checks and throwing AccountNotFoundException
         Account from = lookupService.findByIban(fromIban);
         Account to = lookupService.findByIban(toIban);
 
-        // BUG: NPE if 'from' or 'to' is null!
+        if (from == null) {
+            throw new AccountNotFoundException("Account not found: " + fromIban);
+        }
+        if (to == null) {
+            throw new AccountNotFoundException("Account not found: " + toIban);
+        }
+
         if (from.getBalance().compareTo(amount) < 0) {
             return new TransferResult(false, "Insufficient funds");
         }

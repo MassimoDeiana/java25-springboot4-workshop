@@ -2,46 +2,23 @@ package com.bankflow.workshop.exercise3_stablevalues;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.lang.StableValue;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * TODO: Exercise 3 — Stable Values
+ * SOLUTION: Exercise 3 — Stable Values (JEP 502)
  *
- * CURRENT STATE (before):
- * - Uses volatile + double-checked locking for lazy initialization
- * - Verbose, error-prone (easy to get wrong)
- * - JVM cannot optimize the volatile field as a constant
- *
- * YOUR TASK (after):
- * 1. Replace `volatile SecretKey encryptionKey` with `StableValue<SecretKey>`
- * 2. Replace the double-checked locking block with `stableValue.orElseSet(...)`
- * 3. The result should be ~3 lines instead of ~12
+ * StableValue replaces volatile + double-checked locking.
+ * Thread-safe by construction, JVM constant-folds after first set.
  */
 public class EncryptionKeyProvider {
 
-    // TODO: Replace with StableValue<SecretKey>
-    private volatile SecretKey encryptionKey;
+    private final StableValue<SecretKey> encryptionKey = StableValue.of();
 
-    /**
-     * Lazily initializes and returns the encryption key.
-     * Uses double-checked locking — verbose and error-prone.
-     */
     public SecretKey getEncryptionKey() {
-        // TODO: Replace all of this with: return stableValue.orElseSet(this::generateKey);
-        if (encryptionKey == null) {
-            synchronized (this) {
-                if (encryptionKey == null) {
-                    encryptionKey = generateKey();
-                }
-            }
-        }
-        return encryptionKey;
+        return encryptionKey.orElseSet(this::generateKey);
     }
 
-    /**
-     * Generates a new AES-256 encryption key.
-     * This is expensive — we only want to do it once.
-     */
     private SecretKey generateKey() {
         try {
             KeyGenerator keyGen = KeyGenerator.getInstance("AES");
